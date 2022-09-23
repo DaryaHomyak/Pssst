@@ -72,7 +72,7 @@ class Bug(AnimatedSprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x, self.rect.y = self.position[pos]
-        super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, 5, *groups)
+        super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, FPS, *groups)
         self.cols = 3
         self.stop = False
         self.iteration = 0
@@ -101,20 +101,20 @@ class Bug(AnimatedSprite):
                     self.rect.x += 2
                 self.rect.y += 60 + random.randint(-5, 5)
             self.stop = True
-            super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, 5, *self._groups)
+            super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, FPS, *self._groups)
         # движение между барьерами
         else:
             if self.rect.x == BAREERS[0]:
                 self.direction_right = True
                 self.image = Bug.image_r
                 self.rect.x += 5
-                super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, 5, *self._groups)
+                super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, FPS, *self._groups)
 
             elif self.rect.x == BAREERS[1]:
                 self.direction_right = False
                 self.image = Bug.image_l
                 self.rect.x -= 5
-                super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, 5, *self._groups)
+                super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, FPS, *self._groups)
             else:
                 if self.direction_right:
                     self.rect.x += 5
@@ -148,7 +148,7 @@ class Moth(AnimatedSprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x, self.rect.y = self.position[pos]
-        super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, *groups)
+        super().__init__(self.image, 3, 1, self.rect.x, self.rect.y, FPS, *groups)
         self.cols = 3
 
     def update_(self):
@@ -201,7 +201,7 @@ class Destruction(AnimatedSprite):
         self.image = self.image_r if dir_right else self.image_l
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = pos_x, pos_y
-        super().__init__(self.image, 6, 1, self.rect.x, self.rect.y, 10, *groups)
+        super().__init__(self.image, 6, 1, self.rect.x, self.rect.y, FPS, *groups)
         self.iteration = 0
         self.dir_right = dir_right
 
@@ -240,7 +240,7 @@ class Mainch(AnimatedSprite):
         self.rect.y = HEIGHT // 2 - 150
         self.direction_right = True
         self.last_timer = 0
-        super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, 5, *groups)
+        super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, FPS, *groups)
 
     def move(self, pressed_keys, timer):
         cols = 3
@@ -261,7 +261,7 @@ class Mainch(AnimatedSprite):
                 self.image = Mainch.image_bs2_l
             else:
                 self.image = Mainch.image_l
-            super().__init__(self.image, cols, 1, self.rect.x, self.rect.y, 5, *self._groups)
+            super().__init__(self.image, cols, 1, self.rect.x, self.rect.y, FPS, *self._groups)
         if pressed_keys[pygame.K_RIGHT]:
             self.direction_right = True
             if self.rect.x < BAREERS[1] - self.rect.size[0] + 50:
@@ -272,7 +272,7 @@ class Mainch(AnimatedSprite):
                 self.image = Mainch.image_bs2_r
             else:
                 self.image = Mainch.image_r
-            super().__init__(self.image, cols, 1, self.rect.x, self.rect.y, 5, *self._groups)
+            super().__init__(self.image, cols, 1, self.rect.x, self.rect.y, FPS, *self._groups)
         # выстрел
         if pressed_keys[pygame.K_SPACE] and timer - self.last_timer >= 1:
             self.shoot()
@@ -293,32 +293,33 @@ class Mainch(AnimatedSprite):
 
     # функция для возвращения спрея на полку
     def busket_pass(self):
+        # если персонаж близок к полкам
         if (180 >= self.rect.x or 800 <= self.rect.x) and (self.bs1 or self.bs2):
             past_pos = [0, 0]
+            # перебор всех возможных позиций
             for pos in BCG_STAND_POSITIONS:
 
                 # DAW
-                print(abs(self.rect.x - pos[0]), abs(self.rect.x - pos[0]) < 300)
-                print(past_pos[1], self.rect.y, pos[1], past_pos[1] <= self.rect.y <= pos[1])
+                # print(abs(self.rect.x - pos[0]), abs(self.rect.x - pos[0]) < 300)
+                # print(past_pos[1], self.rect.y, pos[1], past_pos[1] <= self.rect.y <= pos[1])
                 # DAW
-
+                # если полка рядом с персонажем
                 if past_pos[1] <= self.rect.y <= pos[1] and (abs(self.rect.x - pos[0]) < 300):
+                    # спавним спрей на этой позиции
+                    Busket(BCG_STAND_POSITIONS.index(pos), self.bs1, self.bs2, busket_sprites, all_sprites)
+                    Busket(BCG_STAND_POSITIONS.index(pos), True, False, busket_sprites, all_sprites)
+                    print(f"индекс позиции - {BCG_STAND_POSITIONS.index(pos)}")
+                    print(f"взято - {self.bs1, self.bs2}")
                     # DAW
-                    print("YES!!")
-                    # DAW
-
-                    busket = Busket(BCG_STAND_POSITIONS.index(pos), self.bs1, self.bs2, busket_sprites, all_sprites)
-
-                    # DAW
-                    print(busket.helllo())
-                    print(BCG_STAND_POSITIONS.index(pos))
+                    # print(busket.helllo())
+                    # print(BCG_STAND_POSITIONS.index(pos))
                     # DAW
 
                     global free_shelves
                     free_shelves.add(BCG_STAND_POSITIONS.index(pos))
 
                     # DAW
-                    print(free_shelves)
+                    # print(free_shelves)
                     # DAW
 
                     self.bs1, self.bs2 = False, False
@@ -331,7 +332,7 @@ class Mainch(AnimatedSprite):
         self.rect.y = HEIGHT // 2 - 150
         self.image = Mainch.image
         self.bs1, self.bs2 = False, False
-        super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, 5, *self._groups)
+        super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, FPS, *self._groups)
 
     # выстрел
     def shoot(self):
@@ -540,7 +541,7 @@ class Stalk_(pygame.sprite.Sprite):
     def update_(self):
         global flower_hp
         self.cur_frame = flower_hp // 300
-        if flower_hp < 2300:
+        if flower_hp < 2000:
             self.image = self.frames[self.cur_frame]
             self.mask = pygame.mask.from_surface(self.image)
             self.rect.y = HEIGHT - self.frames_y[self.cur_frame]
@@ -613,7 +614,7 @@ def level_1():
     pygame.time.set_timer(CH_MOVING, 10)
     pygame.time.set_timer(FLOWER_GROW, 1000)
     pygame.time.set_timer(TIMEREVENT, 1000)
-    pygame.time.set_timer(ENEMYSPAWN, 5000)
+    pygame.time.set_timer(ENEMYSPAWN, 50000)
     pygame.time.set_timer(CLEAR_TIMER, 500)
     pygame.time.set_timer(BONUS_SPAWN, 50000)
 
@@ -652,6 +653,8 @@ def level_1():
                 moving = False
             if event.type == FLOWER_GROW:
                 flower_hp += 30
+                if flower_hp >= 2000:
+                    return win_screen()
             if event.type == TIMEREVENT:
                 time_count += 1
             if event.type == CLEAR_TIMER:
@@ -682,6 +685,18 @@ def lose_screen():
         print_text(screen, 'YOU DIED', 430, 10, 'white', 100)
         if iteration == 100:
             running = False
+        pygame.display.flip()
+
+
+def win_screen():
+    running = True
+    iteration = 0
+    while running:
+        iteration += 1
+        screen.fill('black')
+        print_text(screen, 'YOU WON', 430, 10, 'white', 100)
+        if iteration == 1000:
+            return start_screen()
         pygame.display.flip()
 
 
