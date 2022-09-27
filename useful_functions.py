@@ -24,7 +24,8 @@ def load_image(name, colorkey=None):
 
 
 # функция для удобного вывода текста на экран
-def print_text(screen, message="", x=0, y=0, font_color='black', font_size=30, frame_color=None, frame_indent=0, frame_width=1):
+def print_text(screen, message="", x=0, y=0, font_color='black', font_size=30, frame_color=None, frame_indent=0,
+               frame_width=1):
     font_type = pygame.font.Font(None, font_size)
     text = font_type.render(message, True, font_color)
     screen.blit(text, (x, y))
@@ -35,3 +36,13 @@ def print_text(screen, message="", x=0, y=0, font_color='black', font_size=30, f
     screen.blit(text, (x, y))
     return (x - frame_indent, y - frame_indent, text.get_rect()[2] + frame_indent * 2 + x,
             text.get_rect()[3] + frame_indent * 2 + y)
+
+
+def load_data(filename, time, score):
+    import pickle
+    file = open(filename, 'ab')
+    result = {}
+    result['time'] = time
+    result['score'] = score
+    pickle.dump(result, file)
+    file.close()
