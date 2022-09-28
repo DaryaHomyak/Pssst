@@ -1,6 +1,5 @@
 import random
 import pygame
-import os
 import sys
 import time
 from useful_functions import load_image, print_text, load_data
@@ -398,13 +397,13 @@ class Busket(pygame.sprite.Sprite):
             print(1, self.bs1, ch.busket_info())
             b_place = random.sample(free_shelves, 1)[0]
             free_shelves.remove(b_place)
-            busket1 = Busket(b_place, True, False, busket_sprites, all_sprites)
+            Busket(b_place, True, False, busket_sprites, all_sprites)
             self.bs1 = False
         elif ch.busket_info()[1]:
             print(2, self.bs2, ch.busket_info())
             b_place = random.sample(free_shelves, 1)[0]
             free_shelves.remove(b_place)
-            busket2 = Busket(b_place, False, True, busket_sprites, all_sprites)
+            Busket(b_place, False, True, busket_sprites, all_sprites)
             self.bs2 = False
 
 
@@ -469,76 +468,7 @@ class Patron(pygame.sprite.Sprite):
             self.kill()
 
 
-# class Flower_(pygame.sprite.Sprite):
-#     frames = []
-#     cur_frame = 0
-#
-#     def __init__(self, *groups):
-#         sheet = load_image('flower.png')
-#         self.rect = pygame.Rect(0, 0, sheet.get_width() // 4,
-#                                 sheet.get_height() // 1)
-#         for j in range(1):
-#             for i in range(4):
-#                 frame_location = (self.rect.w * i, self.rect.h * j)
-#                 self.frames.append(sheet.subsurface(pygame.Rect(
-#                     frame_location, self.rect.size)))
-#
-#         self.image = self.frames[self.cur_frame]
-#         self.rect = self.image.get_rect()
-#         self.rect.x, self.rect.y = 300, 400
-#         super().__init__(*groups)
-#
-#     def grow(self):
-#         if self.cur_frame < 4:
-#             self.cur_frame += 1
-#
-#     def regrow(self):
-#         if self.cur_frame > 0:
-#             self.cur_frame -= 1
-#         else:
-#             st.regrow()
-#
-#     def update_(self):
-#         if self.cur_frame < 4:
-#             self.image = self.frames[self.cur_frame]
-#             self.rect.y = 300
-#             self.rect.x = 400
-
-
-# class Stalk(pygame.sprite.Sprite):
-# image_stalk = load_image('stalk.png')
-# frames = []
-# frames_y = []
-# cur_frame = 0
-# # создание 7 фреймов стеблей разного размера
-# for i in range(1, 8):
-#     frames.append(pygame.transform.scale(image_stalk, (7 * i, 79 * i)))
-#     frames_y.append(79 * i)
-#
-# def __init__(self, *groups):
-#     self.image = self.frames[self.cur_frame]
-#     self.rect = self.image.get_rect()
-#     self.rect.x, self.rect.y = WIDTH // 2, HEIGHT - self.frames_y[0]
-#     self.mask = pygame.mask.from_surface(self.image)
-#     super().__init__(*groups)
-#
-# def grow(self):
-#     if self.cur_frame < 7:
-#         self.cur_frame += 1
-#     if self.cur_frame == 6:
-#         fl = Flower(flower_sprites, all_sprites)
-#
-# def regrow(self):
-#     if self.cur_frame > 0:
-#         self.cur_frame -= 1
-#
-# def update_(self):
-#     if self.cur_frame < 7:
-#         self.image = self.frames[self.cur_frame]
-#         self.rect.y = HEIGHT - self.frames_y[self.cur_frame]
-
-
-class Stalk_(pygame.sprite.Sprite):
+class Stalk(pygame.sprite.Sprite):
     image_stalk = load_image('stalk.png')
     frames = []
     frames_y = []
@@ -571,7 +501,7 @@ class Stalk_(pygame.sprite.Sprite):
             self.mask = pygame.mask.from_surface(self.image)
             self.rect.y = HEIGHT - self.frames_y[self.cur_frame]
         elif not self.stop:
-            fl = Flower(flower_sprites, all_sprites)
+            Flower(flower_sprites, all_sprites)
             self.stop = True
 
 
@@ -622,7 +552,7 @@ patron_sprites_bs2 = pygame.sprite.Group()
 bugs_sprites = pygame.sprite.Group()
 moths_sprites = pygame.sprite.Group()
 flower_sprites = pygame.sprite.Group()
-st = Stalk_(flower_sprites, all_sprites)
+st = Stalk(flower_sprites, all_sprites)
 free_shelves = set(range(8))
 b_place = random.sample(free_shelves, 1)[0]
 free_shelves.remove(b_place)
@@ -647,7 +577,6 @@ def start_screen():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #  проверка на клик по кнопкам
                 if play_btn[0] < event.pos[0] < play_btn[2] and play_btn[1] < event.pos[1] < play_btn[3]:
-                    work = False
                     return level_1()
         pygame.display.flip()
 
@@ -667,6 +596,7 @@ def level_1():
 
     player_lives = 4
     time_count = 0
+    totalizer = 0
     clear_timer = 0
     running = True
     iter_stage = 0
@@ -681,11 +611,11 @@ def level_1():
     moving, keys_list = False, []
 
     pygame.time.set_timer(CH_MOVING, 10)
-    pygame.time.set_timer(FLOWER_GROW, 100)
+    pygame.time.set_timer(FLOWER_GROW, 5000)
     pygame.time.set_timer(TIMEREVENT, 1000)
-    pygame.time.set_timer(ENEMYSPAWN, 50000)
+    pygame.time.set_timer(ENEMYSPAWN, 5000)
     pygame.time.set_timer(CLEAR_TIMER, 500)
-    pygame.time.set_timer(BONUS_SPAWN, 5000)
+    pygame.time.set_timer(BONUS_SPAWN, 30000)
 
     while running:
         # отрисовка фона
@@ -705,8 +635,7 @@ def level_1():
                     ch.move_to_start_pos()
                     print(f'после убийства персонажа - полки:{free_shelves}')
                 else:
-                    running = False
-                    return total_screen()
+                    return start_screen()
         for event in pygame.event.get():
             # выход из игры
             if event.type == pygame.QUIT:
@@ -727,13 +656,13 @@ def level_1():
                         fl.grow()
                     iter_stage += 1
                 if iter_stage // 10 >= 5:
-                    return win_screen()
+                    return level_2()
             if event.type == TIMEREVENT:
                 time_count += 1
             if event.type == CLEAR_TIMER:
                 clear_timer += 1
             if event.type == ENEMYSPAWN:
-                bug = Bug(random.randint(0, 7), bugs_sprites, all_sprites)
+                Bug(random.randint(0, 7), bugs_sprites, all_sprites)
             if event.type == BONUS_SPAWN and len(free_shelves) > 0:
                 b_place = random.sample(free_shelves, 1)[0]
                 free_shelves.remove(b_place)
@@ -747,51 +676,6 @@ def level_1():
         print_text(screen, time.strftime("%M:%S", time.gmtime(time_count)), 10, 10, 'white', 100)
         print_text(screen, str(totalizer), 300, 10, 'white', 100)
         print_text(screen, "LEVEL 1", 800, 10, 'white', 100)
-        pygame.display.flip()
-
-
-def lose_screen():
-    running = True
-    iteration = 0
-    while running:
-        iteration += 1
-        screen.fill('black')
-        print_text(screen, 'YOU DIED', 430, 10, 'white', 100)
-        if iteration == 100:
-            running = False
-        pygame.display.flip()
-
-
-def win_screen():
-    running = True
-    iteration = 0
-    while running:
-        iteration += 1
-        screen.fill('black')
-        print_text(screen, 'YOU WON', 430, 10, 'white', 100)
-        if iteration == 1000:
-            return level_2()
-        pygame.display.flip()
-
-
-def total_screen():
-    # запись данных
-    load_data('res.dat', totalizer, time.strftime("%M:%S", time.gmtime(time_count)))
-    work = True
-    while work:
-        screen.fill('black')
-        play_btn = print_text(screen, 'Play again', 200, 500, 'white', 190, 'white', 20, 5)
-        print_text(screen, str(totalizer), 200, 700, 'white', 190, 'white', 20, 5)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                #  проверка на клик по кнопкам
-                if play_btn[0] < event.pos[0] < play_btn[2] and play_btn[1] < event.pos[1] < play_btn[3]:
-                    print('yep')
-                    work = False
-                    return start_screen()
         pygame.display.flip()
 
 
@@ -824,11 +708,11 @@ def level_2():
     moving, keys_list = False, []
 
     pygame.time.set_timer(CH_MOVING, 10)
-    pygame.time.set_timer(FLOWER_GROW, 1000)
+    pygame.time.set_timer(FLOWER_GROW, 5000)
     pygame.time.set_timer(TIMEREVENT, 1000)
     pygame.time.set_timer(ENEMYSPAWN, 5000)
     pygame.time.set_timer(CLEAR_TIMER, 500)
-    pygame.time.set_timer(BONUS_SPAWN, 50000)
+    pygame.time.set_timer(BONUS_SPAWN, 30000)
 
     while running:
         # отрисовка фона
@@ -848,8 +732,7 @@ def level_2():
                     ch.move_to_start_pos()
                     print(f'после убийства персонажа - полки:{free_shelves}')
                 else:
-                    running = False
-                    return total_screen()
+                    return start_screen()
 
         for event in pygame.event.get():
             # выход из игры
@@ -871,7 +754,9 @@ def level_2():
                         fl.grow()
                     iter_stage += 1
                 if iter_stage // 10 >= 5:
-                    return total_screen()
+                    # победа игрока, запись результатов
+                    load_data('res.dat', totalizer, time.strftime("%M:%S", time.gmtime(time_count)))
+                    return start_screen()
             if event.type == TIMEREVENT:
                 time_count += 1
             if event.type == CLEAR_TIMER:
@@ -894,25 +779,6 @@ def level_2():
         print_text(screen, time.strftime("%M:%S", time.gmtime(time_count)), 10, 10, 'white', 100)
         print_text(screen, str(totalizer), 300, 10, 'white', 100)
         print_text(screen, "LEVEL 2", 800, 10, 'white', 100)
-        pygame.display.flip()
-
-
-# начальный экран
-def end_screen():
-    work = True
-    while work:
-        screen.fill('black')
-        print_text('You losed', 500, 100, 'white', 190, 'white', 20, 10)
-        play_btn = ('Try again!', 500, 500, 'white', 190, 'white', 20, 5)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                #  проверка на клик по кнопкам
-                if play_btn[0] < event.pos[0] < play_btn[2] and play_btn[1] < event.pos[1] < play_btn[3]:
-                    work = False
-                    return 0
         pygame.display.flip()
 
 
