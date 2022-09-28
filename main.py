@@ -210,6 +210,10 @@ class Moth(AnimatedSprite):
                 else:
                     self.rect.x -= 8
                 self.rect.y += self.y_move
+            # если перед этим он косался цветка
+            if self.stop:
+                super().__init__(Bug.image_r if self.direction_right else Bug.image_l , 3, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
+                self.stop = False
         if self.rect.y == HEIGHT:
             self.kill()
         elif self.rect.y <= 0:
@@ -634,18 +638,18 @@ def level_1():
         print_text(screen, str(player_lives), 500, 10, 'white', 100)
         screen.blit(pygame.transform.scale(load_image('mainch_rest.png'), (45, 56)), (560, 20))
         # убийство персонажа
-        # for b in bugs_sprites:
-        #     if pygame.sprite.collide_mask(ch, b):
-        #         player_lives -= 1
-        #         if player_lives > 0:
-        #             # очистка уровня
-        #             for s in all_sprites:
-        #                 if ch_sprites not in s.groups():
-        #                     s.move_to_start_pos()
-        #             ch.move_to_start_pos()
-        #             print(f'после убийства персонажа - полки:{free_shelves}')
-        #         else:
-        #             return start_screen()
+        for b in bugs_sprites:
+            if pygame.sprite.collide_mask(ch, b):
+                player_lives -= 1
+                if player_lives > 0:
+                    # очистка уровня
+                    for s in all_sprites:
+                        if ch_sprites not in s.groups():
+                            s.move_to_start_pos()
+                    ch.move_to_start_pos()
+                    print(f'после убийства персонажа - полки:{free_shelves}')
+                else:
+                    return start_screen()
         for event in pygame.event.get():
             # выход из игры
             if event.type == pygame.QUIT:
