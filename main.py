@@ -89,17 +89,20 @@ class Bug(AnimatedSprite):
                 Destruction(self.direction_right, self.rect.x, self.rect.y, all_sprites)
                 global totalizer
                 totalizer += 35
+        self.mask = pygame.mask.from_surface(Bug.image_tofl_r if self.direction_right else Bug.image_tofl_l)
         # уничтожение цветка
         if pygame.sprite.collide_mask(self, st):
             global flower_hp
             flower_hp -= 1
+            if flower_hp < 0:
+                return start_screen()
             if not self.stop:
                 if self.direction_right:
                     self.image = Bug.image_tofl_r
-                    self.rect.x += 40
+                    self.rect.x = 550
                 else:
                     self.image = Bug.image_tofl_l
-                    self.rect.x += 2
+                    self.rect.x = 645
                 self.rect.y += 60 + random.randint(-5, 5)
             self.stop = True
             super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
@@ -123,6 +126,11 @@ class Bug(AnimatedSprite):
                 else:
                     self.rect.x -= 5
                     self.rect.y += 1
+            # если перед этим он косался цветка
+            if self.stop:
+                super().__init__(Bug.image_r if self.direction_right else Bug.image_l , 3, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
+                self.stop = False
+
         # пересечение барьера
         if self.rect.y == HEIGHT:
             self.kill()
@@ -165,6 +173,8 @@ class Moth(AnimatedSprite):
                 Destruction(self.direction_right, self.rect.x, self.rect.y, all_sprites)
                 global totalizer
                 totalizer += 35  # уничтожение цветка
+
+        self.mask = pygame.mask.from_surface(Bug.image_tofl_r if self.direction_right else Bug.image_tofl_l)
         # уничтожение цветка
         if pygame.sprite.collide_mask(self, st):
             global flower_hp
@@ -586,7 +596,7 @@ def level_1():
     global player_lives
     global time_count
     global free_shelves
-
+    global totalizer
     # очистка
     for s in all_sprites:
         if ch_sprites not in s.groups():
@@ -611,7 +621,7 @@ def level_1():
     moving, keys_list = False, []
 
     pygame.time.set_timer(CH_MOVING, 10)
-    pygame.time.set_timer(FLOWER_GROW, 5000)
+    pygame.time.set_timer(FLOWER_GROW, 1000)
     pygame.time.set_timer(TIMEREVENT, 1000)
     pygame.time.set_timer(ENEMYSPAWN, 5000)
     pygame.time.set_timer(CLEAR_TIMER, 500)
@@ -624,18 +634,18 @@ def level_1():
         print_text(screen, str(player_lives), 500, 10, 'white', 100)
         screen.blit(pygame.transform.scale(load_image('mainch_rest.png'), (45, 56)), (560, 20))
         # убийство персонажа
-        for b in bugs_sprites:
-            if pygame.sprite.collide_mask(ch, b):
-                player_lives -= 1
-                if player_lives > 0:
-                    # очистка уровня
-                    for s in all_sprites:
-                        if ch_sprites not in s.groups():
-                            s.move_to_start_pos()
-                    ch.move_to_start_pos()
-                    print(f'после убийства персонажа - полки:{free_shelves}')
-                else:
-                    return start_screen()
+        # for b in bugs_sprites:
+        #     if pygame.sprite.collide_mask(ch, b):
+        #         player_lives -= 1
+        #         if player_lives > 0:
+        #             # очистка уровня
+        #             for s in all_sprites:
+        #                 if ch_sprites not in s.groups():
+        #                     s.move_to_start_pos()
+        #             ch.move_to_start_pos()
+        #             print(f'после убийства персонажа - полки:{free_shelves}')
+        #         else:
+        #             return start_screen()
         for event in pygame.event.get():
             # выход из игры
             if event.type == pygame.QUIT:
@@ -708,7 +718,7 @@ def level_2():
     moving, keys_list = False, []
 
     pygame.time.set_timer(CH_MOVING, 10)
-    pygame.time.set_timer(FLOWER_GROW, 5000)
+    pygame.time.set_timer(FLOWER_GROW, 1000)
     pygame.time.set_timer(TIMEREVENT, 1000)
     pygame.time.set_timer(ENEMYSPAWN, 5000)
     pygame.time.set_timer(CLEAR_TIMER, 500)
