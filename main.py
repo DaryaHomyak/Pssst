@@ -803,7 +803,6 @@ def level_2():
         print_text(screen, "LEVEL 2", 800, 10, 'white', 100)
         pygame.display.flip()
 
-
 # запуск начального экрана
 start_screen()
 pygame.quit()
