@@ -745,17 +745,17 @@ def level_2():
         print_text(screen, str(player_lives), 500, 10, 'white', 100)
         screen.blit(pygame.transform.scale(load_image('mainch_rest.png'), (45, 56)), (560, 20))
         # убийство персонажа
-#        for b in bugs_sprites:
-        #             if pygame.sprite.collide_mask(ch, b):
-        #                 player_lives -= 1
-        #                 if player_lives > 0:
-        #                    # очистка уровня
-        #                     for s in all_sprites:
-                        #                        if ch_sprites not in s.groups():
-        #                            s.move_to_start_pos()
-        #                    ch.move_to_start_pos()
-        #                else:
-        #                     return start_screen()
+        for b in bugs_sprites:
+            if pygame.sprite.collide_mask(ch, b):
+                player_lives -= 1
+                if player_lives > 0:
+                    # очистка уровня
+                    for s in all_sprites:
+                        if ch_sprites not in s.groups():
+                            s.move_to_start_pos()
+                    ch.move_to_start_pos()
+                else:
+                    return start_screen()
 
         for event in pygame.event.get():
             # выход из игры
@@ -803,7 +803,8 @@ def level_2():
         print_text(screen, str(totalizer), 300, 10, 'white', 100)
         print_text(screen, "LEVEL 2", 800, 10, 'white', 100)
         pygame.display.flip()
-level_2()
+
+
 # запуск начального экрана
 start_screen()
 pygame.quit()
