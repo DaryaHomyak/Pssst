@@ -182,19 +182,20 @@ class Moth(AnimatedSprite):
                 global totalizer
                 totalizer += 35  # уничтожение цветка
                 return
-        self.mask = pygame.mask.from_surface(Bug.image_tofl_r if self.direction_right else Bug.image_tofl_l)
+        self.mask = pygame.mask.from_surface(self.image_tofl_r if self.direction_right else self.image_tofl_l)
         # уничтожение цветка
         if pygame.sprite.collide_mask(self, st) and self.rect.y < 860:
             global flower_hp
             flower_hp -= 1
+            if flower_hp < 0:
+                return start_screen()
             if not self.stop:
                 if self.direction_right:
                     self.image = self.image_tofl_r
-                    self.rect.x += 40
+                    self.rect.x = 540
                 else:
                     self.image = self.image_tofl_l
-                    self.rect.x += 2
-                self.rect.y += 60 + random.randint(-5, 5)
+                    self.rect.x = 645
                 if not self.small_move:
                     self.small_move = True
                     # небольшой сдвиг, т.к. изображение в полете и у цветка различаются по у
@@ -744,17 +745,17 @@ def level_2():
         print_text(screen, str(player_lives), 500, 10, 'white', 100)
         screen.blit(pygame.transform.scale(load_image('mainch_rest.png'), (45, 56)), (560, 20))
         # убийство персонажа
-        for b in bugs_sprites:
-            if pygame.sprite.collide_mask(ch, b):
-                player_lives -= 1
-                if player_lives > 0:
-                    # очистка уровня
-                    for s in all_sprites:
-                        if ch_sprites not in s.groups():
-                            s.move_to_start_pos()
-                    ch.move_to_start_pos()
-                else:
-                    return start_screen()
+#        for b in bugs_sprites:
+        #             if pygame.sprite.collide_mask(ch, b):
+        #                 player_lives -= 1
+        #                 if player_lives > 0:
+        #                    # очистка уровня
+        #                     for s in all_sprites:
+                        #                        if ch_sprites not in s.groups():
+        #                            s.move_to_start_pos()
+        #                    ch.move_to_start_pos()
+        #                else:
+        #                     return start_screen()
 
         for event in pygame.event.get():
             # выход из игры
@@ -802,7 +803,7 @@ def level_2():
         print_text(screen, str(totalizer), 300, 10, 'white', 100)
         print_text(screen, "LEVEL 2", 800, 10, 'white', 100)
         pygame.display.flip()
-
+level_2()
 # запуск начального экрана
 start_screen()
 pygame.quit()
