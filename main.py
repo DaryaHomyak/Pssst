@@ -77,6 +77,7 @@ class Bug(AnimatedSprite):
         self.cols = 3
         self.stop = False
         self.iteration = 0
+        self.small_move = False
 
     def update_(self):
         self.cols = 3
@@ -89,9 +90,10 @@ class Bug(AnimatedSprite):
                 Destruction(self.direction_right, self.rect.x, self.rect.y, all_sprites)
                 global totalizer
                 totalizer += 35
+                return
         self.mask = pygame.mask.from_surface(Bug.image_tofl_r if self.direction_right else Bug.image_tofl_l)
         # уничтожение цветка
-        if pygame.sprite.collide_mask(self, st):
+        if pygame.sprite.collide_mask(self, st) and self.rect.y < 860:
             global flower_hp
             flower_hp -= 1
             if flower_hp < 0:
@@ -103,7 +105,10 @@ class Bug(AnimatedSprite):
                 else:
                     self.image = Bug.image_tofl_l
                     self.rect.x = 645
-                self.rect.y += 60 + random.randint(-5, 5)
+                if not self.small_move:
+                    self.small_move = True
+                    # небольшой сдвиг, т.к. изображение в полете и у цветка различаются по у
+                    self.rect.y += 60 + random.randint(-5, 5)
             self.stop = True
             super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
         # движение между барьерами
@@ -128,7 +133,8 @@ class Bug(AnimatedSprite):
                     self.rect.y += 1
             # если перед этим он косался цветка
             if self.stop:
-                super().__init__(Bug.image_r if self.direction_right else Bug.image_l , 3, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
+                super().__init__(Bug.image_r if self.direction_right else Bug.image_l, 3, 1, self.rect.x, self.rect.y,
+                                 FPS_BAREER, *self._groups)
                 self.stop = False
 
         # пересечение барьера
@@ -161,6 +167,8 @@ class Moth(AnimatedSprite):
         self.rect.x, self.rect.y = self.position[pos]
         super().__init__(self.image, 4, 1, self.rect.x, self.rect.y, FPS_BAREER, *groups)
         self.cols = 3
+        self.small_move = False
+        self.stop = False
 
     def update_(self):
         self.cols = 3
@@ -173,10 +181,10 @@ class Moth(AnimatedSprite):
                 Destruction(self.direction_right, self.rect.x, self.rect.y, all_sprites)
                 global totalizer
                 totalizer += 35  # уничтожение цветка
-
+                return
         self.mask = pygame.mask.from_surface(Bug.image_tofl_r if self.direction_right else Bug.image_tofl_l)
         # уничтожение цветка
-        if pygame.sprite.collide_mask(self, st):
+        if pygame.sprite.collide_mask(self, st) and self.rect.y < 860:
             global flower_hp
             flower_hp -= 1
             if not self.stop:
@@ -187,6 +195,10 @@ class Moth(AnimatedSprite):
                     self.image = self.image_tofl_l
                     self.rect.x += 2
                 self.rect.y += 60 + random.randint(-5, 5)
+                if not self.small_move:
+                    self.small_move = True
+                    # небольшой сдвиг, т.к. изображение в полете и у цветка различаются по у
+                    self.rect.y += 60 + random.randint(-5, 5)
             self.stop = True
             super().__init__(self.image, 1, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
         # движение между барьерами
@@ -212,7 +224,8 @@ class Moth(AnimatedSprite):
                 self.rect.y += self.y_move
             # если перед этим он косался цветка
             if self.stop:
-                super().__init__(Bug.image_r if self.direction_right else Bug.image_l , 3, 1, self.rect.x, self.rect.y, FPS_BAREER, *self._groups)
+                super().__init__(Bug.image_r if self.direction_right else Bug.image_l, 3, 1, self.rect.x, self.rect.y,
+                                 FPS_BAREER, *self._groups)
                 self.stop = False
         if self.rect.y == HEIGHT:
             self.kill()
@@ -323,7 +336,6 @@ class Mainch(AnimatedSprite):
         pos = self.shelf_info()
         if pos != -1:
             free_shelves.add(pos)
-        print(f'после взятия спрея - полки:{free_shelves}')
 
     # взятые банки
     def busket_info(self):
@@ -353,8 +365,6 @@ class Mainch(AnimatedSprite):
             global time_count, time_for_cd
             time_for_cd = int(time.strftime("%S", time.gmtime(time_count)))
             free_shelves.remove(pos)
-
-            print(f'после возвращения спрея - полки:{free_shelves}')
 
             self.bs1, self.bs2 = False, False
 
@@ -421,6 +431,7 @@ class Busket(pygame.sprite.Sprite):
             self.bs2 = False
 
 
+# класс бонусов
 class Bonus(pygame.sprite.Sprite):
     images = [load_image('fertilizer.png'), load_image('fly_swatter.png'), load_image('water_can.png')]
     position = [[100, i * 200 + 90] for i in range(4)] + [[1120, i * 200 + 90] for i in range(4)]
@@ -438,14 +449,16 @@ class Bonus(pygame.sprite.Sprite):
     def update_(self):
         if pygame.sprite.collide_mask(self, ch):
             self.kill()
+            # возвращение свободного места на полках
             pos = ch.shelf_info()
             if pos != -1:
                 free_shelves.add(pos)
-            print(f'после взятия бонуса - полки:{free_shelves}, {pos}')
+            # обновление счета
             global totalizer
             totalizer += 1000
 
 
+# класс патронов
 class Patron(pygame.sprite.Sprite):
     image_bs1_l = pygame.transform.scale(load_image('patron1.png'), (49, 44))
     image_bs1_r = pygame.transform.flip(image_bs1_l, True, False)
@@ -536,7 +549,7 @@ class Flower(pygame.sprite.Sprite):
 
         self.image = self.frames[self.cur_frame]
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = 300, 400
+        self.rect.x, self.rect.y = 430, 300
         super().__init__(*groups)
 
     def move_to_start_pos(self):
@@ -548,7 +561,7 @@ class Flower(pygame.sprite.Sprite):
             if self.cur_frame < 4:
                 self.image = self.frames[self.cur_frame]
                 self.rect.y = 300
-                self.rect.x = 400
+                self.rect.x = 430
             self.cur_frame += 1
             self.fl_iteration = 0
 
@@ -574,7 +587,6 @@ busket1 = Busket(b_place, True, False, busket_sprites, all_sprites)
 b_place = random.sample(free_shelves, 1)[0]
 free_shelves.remove(b_place)
 busket2 = Busket(b_place, False, True, busket_sprites, all_sprites)
-print(f'инициализация - полки:{free_shelves}')
 player_lives = 1
 
 
@@ -606,7 +618,6 @@ def level_1():
         if ch_sprites not in s.groups():
             s.move_to_start_pos()
     ch.move_to_start_pos()
-    print(f'после очистки уровня - полки:{free_shelves}')
 
     player_lives = 4
     time_count = 0
@@ -647,7 +658,6 @@ def level_1():
                         if ch_sprites not in s.groups():
                             s.move_to_start_pos()
                     ch.move_to_start_pos()
-                    print(f'после убийства персонажа - полки:{free_shelves}')
                 else:
                     return start_screen()
         for event in pygame.event.get():
@@ -704,7 +714,6 @@ def level_2():
         if ch_sprites not in s.groups():
             s.move_to_start_pos()
     ch.move_to_start_pos()
-    print(f'после очистки уровня - полки:{free_shelves}')
 
     player_lives = 4
     time_count = 0
@@ -744,7 +753,6 @@ def level_2():
                         if ch_sprites not in s.groups():
                             s.move_to_start_pos()
                     ch.move_to_start_pos()
-                    print(f'после убийства персонажа - полки:{free_shelves}')
                 else:
                     return start_screen()
 
