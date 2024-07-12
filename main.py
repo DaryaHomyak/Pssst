@@ -419,13 +419,11 @@ class Busket(pygame.sprite.Sprite):
     def move_to_start_pos(self):
         global free_shelves
         if ch.busket_info()[0]:
-            print(1, self.bs1, ch.busket_info())
             b_place = random.sample(free_shelves, 1)[0]
             free_shelves.remove(b_place)
             Busket(b_place, True, False, busket_sprites, all_sprites)
             self.bs1 = False
         elif ch.busket_info()[1]:
-            print(2, self.bs2, ch.busket_info())
             b_place = random.sample(free_shelves, 1)[0]
             free_shelves.remove(b_place)
             Busket(b_place, False, True, busket_sprites, all_sprites)
@@ -745,17 +743,17 @@ def level_2():
         print_text(screen, str(player_lives), 500, 10, 'white', 100)
         screen.blit(pygame.transform.scale(load_image('mainch_rest.png'), (45, 56)), (560, 20))
         # убийство персонажа
-#        for b in bugs_sprites:
-        #             if pygame.sprite.collide_mask(ch, b):
-        #                 player_lives -= 1
-        #                 if player_lives > 0:
-        #                    # очистка уровня
-        #                     for s in all_sprites:
-                        #                        if ch_sprites not in s.groups():
-        #                            s.move_to_start_pos()
-        #                    ch.move_to_start_pos()
-        #                else:
-        #                     return start_screen()
+        for b in bugs_sprites:
+            if pygame.sprite.collide_mask(ch, b):
+                player_lives -= 1
+                if player_lives > 0:
+                    # очистка уровня
+                    for s in all_sprites:
+                        if ch_sprites not in s.groups():
+                            s.move_to_start_pos()
+                    ch.move_to_start_pos()
+                else:
+                    return start_screen()
 
         for event in pygame.event.get():
             # выход из игры
@@ -803,7 +801,8 @@ def level_2():
         print_text(screen, str(totalizer), 300, 10, 'white', 100)
         print_text(screen, "LEVEL 2", 800, 10, 'white', 100)
         pygame.display.flip()
-level_2()
+
+
 # запуск начального экрана
 start_screen()
 pygame.quit()
